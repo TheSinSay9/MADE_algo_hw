@@ -1,14 +1,19 @@
+/*
+Реализовать очередь с динамическим зацикленным буфером.
+Обрабатывать команды push back и pop front.
+*/
+
 #include <iostream>
 
 using namespace std;
 
-class Queue{
-public:
+class Queue {
+ public:
     Queue();
     void push_back(int value);
     int pop_front();
 
-private:
+ private:
     int capacity;
     int *body;
     // head - индекс указывающий куда добавлять элемент
@@ -28,13 +33,13 @@ Queue::Queue() {
 }
 
 int Queue::pop_front() {
-    if (size > 0){
+    if (size > 0) {
         int value = body[tail];
         // Сдвиг "указателя" вправо на единицу с учётом зацикленности
         tail = (tail + 1) % capacity;
         size--;
         return value;
-    } else{
+    } else {
         return -1;
     }
 }
@@ -54,7 +59,7 @@ void Queue::body_expansion() {
     int new_capasity = capacity*2;
     int *new_body = new int[new_capasity];
 
-    for(int i = 0; i < capacity; i++){
+    for (int i = 0; i < capacity; i++) {
         int index_in_body = (tail + i) % capacity;
         new_body[i] = body[index_in_body];
     }
@@ -74,23 +79,22 @@ int main() {
     Queue queue;
 
     bool done = false;
-    for (int i = 0; i < n; i++){
+    for (int i = 0; i < n; i++) {
         int k;
         int value;
         cin >> k >> value;
-        if (k == 3){
+        if (k == 3) {
             queue.push_back(value);
-        }
-        else if (k == 2){
+        } else if (k == 2) {
             int value_from_queue = queue.pop_front();
-            if (value_from_queue != value){
+            if (value_from_queue != value) {
                 done = true;
                 cout << "NO";
                 break;
             }
         }
     }
-    if (!done){
+    if (!done) {
         cout << "YES";
     }
 
