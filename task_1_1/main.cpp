@@ -10,7 +10,9 @@ using namespace std;
 class Queue {
  public:
     Queue();
+    ~Queue();
     void push_back(int value);
+    // Возвращает -1, если очередь пуста
     int pop_front();
 
  private:
@@ -30,6 +32,10 @@ Queue::Queue() {
     head = 0;
     tail = 0;
     size = 0;
+}
+
+Queue::~Queue() {
+    delete[] body;
 }
 
 int Queue::pop_front() {
