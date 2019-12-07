@@ -46,7 +46,7 @@ bool HashTable::Has(const std::string& key) const {
     int mod = table.size();
     int i = 1;
     while (table[hash].key != "" && (table[hash].key != key || table[hash].deleted)) {
-        hash = (hash + (i)%mod)%mod;
+        hash = (hash + i)%mod;
         i++;
     }
 
@@ -62,6 +62,11 @@ bool HashTable::Add(const std::string& key) {
     if (Has(key))
         return false;
 
+    // При заполнении 3/4 выполнение перехеширования
+    if (!rehashing && elements_count >= 3*(table.size() / 4)) {
+        ReHash();
+    }
+
     // Квдаратичное пробирование до тех пор, пока не найдётся пустая строка, либо удалённая строка
     int hash = Hash(key);
     int mod = table.size();
@@ -76,10 +81,6 @@ bool HashTable::Add(const std::string& key) {
     table[hash].key = key;
     elements_count++;
 
-    // При заполнении 3/4 выполнение перехеширования
-    if (!rehashing && elements_count >= 3*(table.size() / 4)) {
-        ReHash();
-    }
     return  true;
 }
 
@@ -99,6 +100,7 @@ bool HashTable::Remove(const std::string& key) {
 
     if (table[hash].key != "") {
         table[hash].deleted = true;
+        table[hash].key = " ";
         return true;
     } else {
         return false;
@@ -112,7 +114,7 @@ int HashTable::Hash(const std::string &key) const {
     int mod = table.size();
     int hash = key[0]%mod;
     for (int i = 1; i < key.size(); i++) {
-        hash = ((hash*a)%mod + (key[i])%mod)%mod;
+        hash = (hash*a + key[i])%mod;
     }
     return hash;
 }
@@ -121,11 +123,10 @@ void HashTable::ReHash() {
     // Метод для перехеширования таблицы
 
     // Создание нового тела таблицы
-    std::vector<HashTableNode> new_table = std::vector<HashTableNode>(table.size()*2,
-            {"", true});
+    std::vector<HashTableNode> new_table(table.size()*2, {"", true});
     // Создание буфера для старого тела таблицы
-    std::vector<HashTableNode> old_table = table;
-    table = new_table;
+    std::vector<HashTableNode> old_table = std::move(table);
+    table = std::move(new_table);
     elements_count = 0;
     // Добавление в новое тело таблицы непустых и неудалённых строк
     rehashing = true;
