@@ -34,12 +34,12 @@ BitsReader::BitsReader(std::vector<byte> &buffer) {
     iter = buffer_.begin();
 }
 
-bool BitsReader::IsLastByte() {
+bool BitsReader::IsLastByte const() {
     int diff = buffer_.end() - iter;
     return diff <= 1;
 }
 
-bool BitsReader::IsEnd() {
+bool BitsReader::IsEnd const() {
     return iter == buffer_.end();
 }
 
@@ -389,13 +389,12 @@ TreeNode* ReadTree (BitsReader &bits_reader) {
                 }
             } else {
                 // Добавление нелистовой вершины
+                TreeNode* new_node = new TreeNode(false, ' ', 0);
                 if (!traversal_pointer->left) {
-                    TreeNode* new_node = new TreeNode(false, ' ', 0);
                     traversal_pointer->left = new_node;
                     new_node->parent = traversal_pointer;
                     traversal_pointer = new_node;
                 } else {
-                    TreeNode* new_node = new TreeNode(false, ' ', 0);
                     traversal_pointer->right = new_node;
                     new_node->parent = traversal_pointer;
                     traversal_pointer = new_node;
@@ -461,6 +460,8 @@ void Encode(IInputStream& original, IOutputStream& compressed) {
     // Функция для записи кода дерева перед кодом самого сообщения
     CodeTree(root, bits_writer);
 
+    delete root;
+
     // Кодирование самого сообщения с помощью таблицы
     for (auto it = message.begin(); it != message.end(); it++) {
         std::vector<bool> code = table[*it];
@@ -476,6 +477,7 @@ void Encode(IInputStream& original, IOutputStream& compressed) {
     for (auto elem : result) {
         compressed.Write(elem);
     }
+
 }
 
 void Decode(IInputStream& compressed, IOutputStream& original) {
@@ -497,6 +499,8 @@ void Decode(IInputStream& compressed, IOutputStream& original) {
 
     // Декодирование оставшейся части сообщения
     std::vector<byte> output = Decode_Internal(bits_reader, tree, last_char_bits_count);
+
+    delete tree;
 
     for (auto elem : output) {
         original.Write(elem);
