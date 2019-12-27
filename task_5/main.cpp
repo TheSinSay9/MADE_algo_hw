@@ -460,7 +460,7 @@ void Encode(IInputStream& original, IOutputStream& compressed) {
     // Функция для записи кода дерева перед кодом самого сообщения
     CodeTree(root, bits_writer);
 
-    delete root;
+    delete *root;
 
     // Кодирование самого сообщения с помощью таблицы
     for (auto it = message.begin(); it != message.end(); it++) {
@@ -500,7 +500,7 @@ void Decode(IInputStream& compressed, IOutputStream& original) {
     // Декодирование оставшейся части сообщения
     std::vector<byte> output = Decode_Internal(bits_reader, tree, last_char_bits_count);
 
-    delete tree;
+    delete *tree;
 
     for (auto elem : output) {
         original.Write(elem);
